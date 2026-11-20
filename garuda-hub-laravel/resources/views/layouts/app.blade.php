@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', 'Garuda-Hub')</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; background: #f4f6f8; color: #222; }
+        header { background: #1b3a5c; color: #fff; padding: 14px 24px; }
+        header a { color: #fff; text-decoration: none; font-weight: bold; font-size: 20px; }
+        main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+        .card { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; background: #e3e8ee; }
+        .terbuka { background: #d4f4dd; color: #146c2e; }
+        .ditutup { background: #f8d7da; color: #842029; }
+        .muted { color: #667; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e3e8ee; }
+        a { color: #1b5fa8; }
+        .btn { display: inline-block; padding: 8px 14px; background: #1b5fa8; color: #fff; border: 0; border-radius: 6px; text-decoration: none; cursor: pointer; font-size: 14px; }
+        .btn-danger { background: #b02a37; }
+        .flash { background: #d4f4dd; padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; }
+        .error { color: #b02a37; font-size: 13px; }
+        input, select, textarea { width: 100%; padding: 8px; margin: 4px 0 12px; box-sizing: border-box; border: 1px solid #ccd; border-radius: 6px; font: inherit; }
+    </style>
+</head>
+<body>
+    <header><a href="{{ route('projects.index') }}">Garuda-Hub</a></header>
+    <main>
+        @if (session('success'))
+            <div class="flash">{{ session('success') }}</div>
+        @endif
+        @yield('content')
+    </main>
+</body>
+</html>

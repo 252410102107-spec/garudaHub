@@ -17,4 +17,11 @@ class Project extends Model
     {
         return $this->hasMany(Bid::class);
     }
+
+    protected function casts(): array
+    {
+        return [
+            'batas_lelang' => 'date',
+        ];
+    }
 }
