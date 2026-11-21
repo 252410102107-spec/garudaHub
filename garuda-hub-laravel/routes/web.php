@@ -5,4 +5,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/projects');
 
-Route::resource('projects', ProjectController::class)->only(['index', 'show']);
+Route::resource('projects', ProjectController::class);

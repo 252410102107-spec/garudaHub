@@ -4,6 +4,7 @@
 
 @section('content')
     <h2>Daftar Proyek</h2>
+    <p><a href="{{ route('projects.create') }}" class="btn">+ Tambah Proyek</a></p>
 
     @forelse ($projects as $project)
         <div class="card">
