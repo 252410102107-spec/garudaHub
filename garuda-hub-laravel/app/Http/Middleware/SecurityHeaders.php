@@ -23,6 +23,7 @@ class SecurityHeaders
             . "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
         );
         $response->headers->remove('X-Powered-By');
+        header_remove('X-Powered-By');
 
         return $response;
     }
