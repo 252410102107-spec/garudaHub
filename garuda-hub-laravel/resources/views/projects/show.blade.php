@@ -6,7 +6,7 @@
 <p><a href="{{ route('projects.index') }}">&larr; Kembali</a></p>
 
 <div class="card">
-    <h2 style="margin-top:0">
+    <h2 class="tight">
         {{ $project->judul }}
         <span class="badge {{ $project->status }}">{{ $project->status }}</span>
     </h2>
@@ -19,15 +19,18 @@
         Batas lelang: {{ $project->batas_lelang->format('d M Y') }}
     </div>
 </div>
-<div style="display:flex; gap:8px; margin-bottom:20px">
+
+@can('update', $project)
+<div class="actions">
     <a href="{{ route('projects.edit', $project) }}" class="btn">Edit</a>
     <form method="POST" action="{{ route('projects.destroy', $project) }}"
-        onsubmit="return confirm('Yakin hapus proyek ini?')">
+        data-confirm="Yakin hapus proyek ini?">
         @csrf
         @method('DELETE')
         <button type="submit" class="btn btn-danger">Hapus</button>
     </form>
 </div>
+@endcan
 
 <h3>Penawaran ({{ $project->bids->count() }})</h3>
 <div class="card">

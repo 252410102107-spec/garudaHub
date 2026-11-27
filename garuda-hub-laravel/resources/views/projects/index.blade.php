@@ -4,11 +4,13 @@
 
 @section('content')
     <h2>Daftar Proyek</h2>
-    <p><a href="{{ route('projects.create') }}" class="btn">+ Tambah Proyek</a></p>
+    @can('create', App\Models\Project::class)
+        <p><a href="{{ route('projects.create') }}" class="btn">+ Tambah Proyek</a></p>
+    @endcan
 
     @forelse ($projects as $project)
         <div class="card">
-            <h3 style="margin:0 0 6px">
+            <h3 class="tight">
                 <a href="{{ route('projects.show', $project) }}">{{ $project->judul }}</a>
                 <span class="badge {{ $project->status }}">{{ $project->status }}</span>
             </h3>
