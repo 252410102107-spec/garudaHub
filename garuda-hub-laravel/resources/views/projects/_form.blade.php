@@ -1,15 +1,5 @@
 @php $p = $project ?? null; @endphp
 
-<label>Klien</label>
-<select name="client_id">
-    @foreach ($clients as $client)
-    <option value="{{ $client->id }}" @selected(old('client_id', $p?->client_id) == $client->id)>
-        {{ $client->name }}
-    </option>
-    @endforeach
-</select>
-@error('client_id') <div class="error">{{ $message }}</div> @enderror
-
 <label>Judul</label>
 <input type="text" name="judul" value="{{ old('judul', $p?->judul) }}">
 @error('judul') <div class="error">{{ $message }}</div> @enderror

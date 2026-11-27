@@ -1,10 +1,11 @@
 <?php
+// NIM: 252410102107
 
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ProjectController extends Controller
 {
@@ -27,14 +28,19 @@ class ProjectController extends Controller
 
     public function create()
     {
-        $clients = User::where('role', 'klien')->orderBy('name')->get();
+        Gate::authorize('create', Project::class);
 
-        return view('projects.create', compact('clients'));
+        return view('projects.create');
     }
 
     public function store(Request $request)
     {
-        $project = Project::create($this->validated($request));
+        Gate::authorize('create', Project::class);
+
+        $data = $this->validated($request);
+        $data['client_id'] = $request->user()->id; // dari session, bukan dari form
+
+        $project = Project::create($data);
 
         return redirect()->route('projects.show', $project)
             ->with('success', 'Proyek berhasil ditambahkan.');
@@ -42,13 +48,15 @@ class ProjectController extends Controller
 
     public function edit(Project $project)
     {
-        $clients = User::where('role', 'klien')->orderBy('name')->get();
+        Gate::authorize('update', $project);
 
-        return view('projects.edit', compact('project', 'clients'));
+        return view('projects.edit', compact('project'));
     }
 
     public function update(Request $request, Project $project)
     {
+        Gate::authorize('update', $project);
+
         $project->update($this->validated($request));
 
         return redirect()->route('projects.show', $project)
@@ -57,6 +65,8 @@ class ProjectController extends Controller
 
     public function destroy(Project $project)
     {
+        Gate::authorize('delete', $project);
+
         $project->delete();
 
         return redirect()->route('projects.index')
@@ -66,9 +76,8 @@ class ProjectController extends Controller
     private function validated(Request $request): array
     {
         return $request->validate([
-            'client_id'    => ['required', 'exists:users,id'],
             'judul'        => ['required', 'string', 'max:200'],
-            'deskripsi'    => ['required', 'string'],
+            'deskripsi'    => ['required', 'string', 'max:5000'],
             'kategori'     => ['required', 'string', 'max:50'],
             'budget_min'   => ['required', 'integer', 'min:0'],
             'budget_max'   => ['required', 'integer', 'gte:budget_min'],
