@@ -1,8 +1,8 @@
 # Garuda-Hub (Laravel) — Episode 2: Secure the System
 
-**Nama:** MIRZA UCHMAL GANI
-**NIM:** 252410102107
-**Branch:** `ep2-security`
+**Nama:** MIRZA UCHMAL GANI  
+**NIM:** 252410102107  
+**Branch:** `ep2-security`  
 
 ## Hasil Scan OWASP ZAP
 
