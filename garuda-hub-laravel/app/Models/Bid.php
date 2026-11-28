@@ -17,4 +17,9 @@ class Bid extends Model
     {
         return $this->belongsTo(User::class, 'developer_id');
     }
+
+    public function rating()
+    {
+        return $this->hasOne(Rating::class);
+    }
 }
