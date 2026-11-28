@@ -61,4 +61,37 @@
     </table>
     @endif
 </div>
+
+@foreach ($project->bids->filter(fn ($b) => $b->is_winner) as $bid)
+<h3>Rating untuk {{ $bid->developer->name }}</h3>
+<div class="card">
+    @if ($bid->rating)
+        <p><strong>{{ $bid->rating->skor }} / 5</strong></p>
+        @if ($bid->rating->komentar)
+            <p>{{ $bid->rating->komentar }}</p>
+        @endif
+    @else
+        @can('rate', $bid)
+        <form method="POST" action="{{ route('ratings.store', $bid) }}">
+            @csrf
+            <label>Skor (1-5)</label>
+            <select name="skor">
+                @foreach (range(1, 5) as $n)
+                <option value="{{ $n }}" @selected(old('skor') == $n)>{{ $n }}</option>
+                @endforeach
+            </select>
+            @error('skor') <div class="error">{{ $message }}</div> @enderror
+
+            <label>Komentar</label>
+            <textarea name="komentar" rows="3">{{ old('komentar') }}</textarea>
+            @error('komentar') <div class="error">{{ $message }}</div> @enderror
+
+            <button type="submit" class="btn">Kirim Rating</button>
+        </form>
+        @else
+        <p class="muted">Belum ada rating.</p>
+        @endcan
+    @endif
+</div>
+@endforeach
 @endsection
