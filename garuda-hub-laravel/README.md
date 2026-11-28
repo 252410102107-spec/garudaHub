@@ -1,58 +1,58 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Garuda-Hub (Laravel) — Episode 2: Secure the System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Nama:** MIRZA UCHMAL GANI
+**NIM:** 252410102107
+**Branch:** `ep2-security`
 
-## About Laravel
+## Hasil Scan OWASP ZAP
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![Hasil scan OWASP ZAP dan komentar NIM di kode](docs/screenshots/zap-scan.png)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Hasil: **0 High, 0 Medium, 4 Low, 3 Informational**. Komentar NIM terlihat di
+`app/Http/Middleware/SecurityHeaders.php` (`// NIM: 252410102107`) dan di HTML
+layout (`<!-- NIM: 252410102107 -->`).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Laporan lengkap: [docs/zap-report.html](docs/zap-report.html)
 
-## Learning Laravel
+## Perbaikan Keamanan
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Misi | Implementasi | File |
+| --- | --- | --- |
+| Login/Logout + hashing kuat | `Auth::attempt`, password bcrypt (cast `hashed`, cost 12) | `AuthController.php`, `User.php` |
+| Session | `session()->regenerate()` saat login, `invalidate()` + `regenerateToken()` saat logout, cookie HttpOnly + SameSite=Lax, lifetime 30 menit | `AuthController.php`, `.env` |
+| CSRF | `@csrf` di semua form, logout lewat POST | `resources/views/**` |
+| XSS (output encoding) | Seluruh output memakai `{{ }}`, tidak ada `{!! !!}` | `resources/views/**` |
+| CSP & header keamanan | CSP `script-src 'self'`, X-Frame-Options, nosniff, Referrer-Policy; CSS/JS inline dipindah ke `public/` | `SecurityHeaders.php`, `public/css`, `public/js` |
+| Otorisasi | Hanya pemilik proyek (atau admin) yang boleh edit/hapus; `client_id` diambil dari sesi | `ProjectPolicy.php`, `ProjectController.php` |
+| Brute force | `throttle:5,1` pada login | `routes/web.php` |
+| Validasi input | Aturan `integer`, `date`, `in:`, `max:` | `ProjectController.php` |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+SQL Injection dicegah dengan Eloquent/Query Builder (parameter ter-bind). Tidak ada
+query mentah (`DB::raw`/`whereRaw`) di aplikasi.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Catatan False Positive
 
-## Agentic Development
+Dua alert High dari scan aktif sudah diverifikasi sebagai false positive dan ditandai di ZAP:
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+1. **Path Traversal** pada `budget_min`: evidence kosong, confidence Low, input divalidasi
+   `integer` dan tidak dipakai untuk akses file. Response 200 berisi halaman biasa tanpa
+   isi file sistem.
+2. **SQL Injection (SQLite, time based)** pada `batas_lelang`: payload khusus SQLite
+   sedangkan database yang dipakai MySQL. Waktu respons serangan (1630/1727 ms) tidak
+   berbeda dari baseline (1718 ms), dan input ditolak validasi `date` sebelum mencapai query.
+
+Alert Low yang tersisa (X-Powered-By dari PHP dev server, cookie XSRF-TOKEN tanpa HttpOnly
+bawaan Laravel, dan lainnya) tidak memengaruhi syarat bebas High/Critical.
+
+## Menjalankan Secara Lokal
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
+# isi koneksi MySQL di .env, lalu:
+php artisan migrate --seed
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Akun seeder berdomain `example.com`. Atur password sendiri lewat `php artisan tinker`.
